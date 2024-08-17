@@ -17,36 +17,41 @@ jobs:
       - name: Build Docker image for Next.js
         run: |
           cd next2
+          pwd  # Проверка текущей директории
           docker build -t next2:latest -f Dockerfile.production .
-          docker save next2:latest -o next2.tar
-          ls -l next2.tar  # Проверка наличия файла next2.tar
+          docker save next2:latest -o ../next2.tar  # Сохраняем файл на уровень выше
+          ls -l ../next2.tar  # Проверка наличия файла next2.tar
 
       # Сборка и сохранение Docker-образа для Strapi с использованием Dockerfile.production
       - name: Build Docker image for Strapi
         run: |
           cd website
+          pwd  # Проверка текущей директории
           docker build -t strapi:latest -f Dockerfile.production .
-          docker save strapi:latest -o strapi.tar
-          ls -l strapi.tar  # Проверка наличия файла strapi.tar
+          docker save strapi:latest -o ../strapi.tar  # Сохраняем файл на уровень выше
+          ls -l ../strapi.tar  # Проверка наличия файла strapi.tar
 
       # Загрузка Docker-образов в артефакты GitHub
-      - name: Upload Docker images to GitHub artifacts
+      - name: Upload next2 Docker image to GitHub artifacts
         uses: actions/upload-artifact@v2
         with:
           name: next2-image
-          path: next2.tar
+          path: ../next2.tar  # Указываем путь на уровень выше
 
-      - name: Upload Docker images to GitHub artifacts
+      - name: Upload strapi Docker image to GitHub artifacts
         uses: actions/upload-artifact@v2
         with:
           name: strapi-image
-          path: strapi.tar
+          path: ../strapi.tar  # Указываем путь на уровень выше
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code (Deploy Step)
+        uses: actions/checkout@v2
+
       - name: Download next2 Docker image from GitHub artifacts
         uses: actions/download-artifact@v2
         with:
@@ -69,7 +74,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
-          debug: true  # Включение режима отладки
+          debug: true
 
       # Копирование Docker-образа strapi на VPS
       - name: Copy strapi Docker image to VPS
@@ -81,7 +86,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
-          debug: true  # Включение режима отладки
+          debug: true
 
       # Копирование docker-compose-production.yml на VPS
       - name: Copy docker-compose-production.yml to VPS
@@ -93,7 +98,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
-          debug: true  # Включение режима отладки
+          debug: true
 
       # Остановка старых контейнеров, загрузка новых и запуск с новыми образами
       - name: SSH into VPS and restart containers with new images
@@ -109,4 +114,4 @@ jobs:
             docker load -i next2.tar
             docker load -i strapi.tar
             docker-compose -f docker-compose-production.yml up -d --build
-          debug: true  # Включение режима отладки
+          debug: true
