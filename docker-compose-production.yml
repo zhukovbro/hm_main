@@ -9,7 +9,7 @@ services:
   frontend:
     image: next2:latest  # Использование образа, переданного на сервер
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
       - /app/node_modules
 
