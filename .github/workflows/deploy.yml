@@ -1,4 +1,4 @@
-name: Build, Push, Deploy Docker Containers2
+name: Build, Push, Deploy Docker Containers
 
 on:
   push:
@@ -17,13 +17,13 @@ jobs:
         run: |
           cd next2
           docker build -t next2:latest -f Dockerfile.production .
-          docker save next2:latest -o ../next2.tar
+          docker save next2:latest -o next2.tar
 
       - name: Build Docker image for Strapi
         run: |
           cd website
           docker build -t strapi:latest -f Dockerfile.production .
-          docker save strapi:latest -o ../strapi.tar
+          docker save strapi:latest -o strapi.tar
 
       - name: Upload Next.js Docker image to GitHub artifacts
         uses: actions/upload-artifact@v2
@@ -53,6 +53,11 @@ jobs:
         with:
           name: strapi-image
           path: .
+
+      - name: Check if images exist
+        run: |
+          if [ ! -f "next2.tar" ]; then echo "next2.tar not found!"; exit 1; fi
+          if [ ! -f "strapi.tar" ]; then echo "strapi.tar not found!"; exit 1; fi
 
       - name: Copy Docker images to VPS
         uses: appleboy/scp-action@v0.1.0
@@ -86,7 +91,5 @@ jobs:
           script: |
             cd /root/docker_images/
             docker-compose down
-            docker load -i next2.tar
-            docker load -i strapi.tar
             docker-compose up -d --build
           debug: true
