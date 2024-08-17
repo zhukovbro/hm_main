@@ -1,4 +1,4 @@
-name: Build, Push, Deploy Docker Containers2
+name: Build, Push, Deploy Docker Containers
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
       # Сборка и сохранение Docker-образа для Strapi с использованием Dockerfile.production
       - name: Build Docker image for Strapi
         run: |
-          cd ../website
+          cd website
           docker build -t strapi:latest -f Dockerfile.production .
           docker save strapi:latest -o strapi.tar
 
