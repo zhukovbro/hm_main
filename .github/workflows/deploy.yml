@@ -19,7 +19,9 @@ jobs:
           cd next2
           docker build -t next2:latest -f Dockerfile.production .
           docker images | grep next2  # Проверка наличия образа
+          ls -l                       # Проверка файлов в директории
           docker save next2:latest -o next2.tar
+          ls -l next2.tar             # Проверка наличия файла next2.tar
 
       # Сборка и сохранение Docker-образа для Strapi с использованием Dockerfile.production
       - name: Build Docker image for Strapi
@@ -27,9 +29,11 @@ jobs:
           cd website
           docker build -t strapi:latest -f Dockerfile.production .
           docker images | grep strapi  # Проверка наличия образа
+          ls -l                        # Проверка файлов в директории
           docker save strapi:latest -o strapi.tar
+          ls -l strapi.tar             # Проверка наличия файла strapi.tar
 
-      # Проверка наличия файлов
+      # Проверка наличия файлов перед отправкой
       - name: List files for debugging
         run: ls -l next2/ && ls -l website/ && ls -l .
 
