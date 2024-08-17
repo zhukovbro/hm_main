@@ -17,13 +17,13 @@ jobs:
         run: |
           cd next2
           docker build -t next2:latest -f Dockerfile.production .
-          docker save next2:latest -o next2.tar
+          docker save next2:latest -o ../next2.tar
 
       - name: Build Docker image for Strapi
         run: |
           cd website
           docker build -t strapi:latest -f Dockerfile.production .
-          docker save strapi:latest -o strapi.tar
+          docker save strapi:latest -o ../strapi.tar
 
       - name: Upload Next.js Docker image to GitHub artifacts
         uses: actions/upload-artifact@v2
@@ -82,9 +82,4 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
-          port: ${{ secrets.VPS_PORT }}
-          script: |
-            cd /root/docker_images/
-            docker-compose down
-            docker-compose up -d --build
-          debug: true
+          port: ${{ secrets.VPS_P
