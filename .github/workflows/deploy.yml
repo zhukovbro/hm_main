@@ -27,6 +27,10 @@ jobs:
           docker build -t strapi:latest -f Dockerfile.production .
           docker save strapi:latest -o strapi.tar
 
+      # Проверка наличия файлов
+      - name: List files for debugging
+        run: ls -l next2/ && ls -l website/ && ls -l .
+
       # Копирование Docker-образов и docker-compose-production.yml на VPS
       - name: Copy Docker images and docker-compose-production.yml to VPS
         uses: appleboy/scp-action@v0.1.0
