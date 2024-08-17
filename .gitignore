@@ -4,3 +4,4 @@ congig
 makefile_vps
 Makefile
 .DS_Store
+docker-compose.yml
