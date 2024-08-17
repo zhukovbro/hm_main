@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: "postgres"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_prod:/var/lib/postgresql/data
+    env_file:
+      - ./config/production.env
+  frontend:
+    build:
+      context: ./next2
+      dockerfile: Dockerfile.production
+    ports:
+      - "80:80"
+    volumes:
+      - ./next2/src:/app/src
+      - /app/node_modules
+    env_file:
+      - ./config/production.env
+  backend:
+    build:
+      context: ./website
+      dockerfile: Dockerfile.production
+    ports:
+      - "1337:1337"
+    volumes:
+      - ./website:/app
+      - /app/node_modules
+      - strapi_public_prod:/app/public
+    depends_on:
+      - postgres
+    env_file:
+      - ./config/production.env
+volumes:
+  postgres_prod:
+  strapi_public_prod:
