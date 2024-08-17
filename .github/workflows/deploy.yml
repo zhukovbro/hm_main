@@ -17,25 +17,25 @@ jobs:
         run: |
           cd next2
           docker build -t next2:latest -f Dockerfile.production .
-          docker save next2:latest -o next2.tar
+          docker save next2:latest -o /root/next2.tar
 
       - name: Build Docker image for Strapi
         run: |
           cd website
           docker build -t strapi:latest -f Dockerfile.production .
-          docker save strapi:latest -o strapi.tar
+          docker save strapi:latest -o /root/strapi.tar
 
       - name: Upload Next.js Docker image to GitHub artifacts
         uses: actions/upload-artifact@v2
         with:
           name: next2-image
-          path: next2.tar
+          path: /root/next2.tar
 
       - name: Upload Strapi Docker image to GitHub artifacts
         uses: actions/upload-artifact@v2
         with:
           name: strapi-image
-          path: strapi.tar
+          path: /root/strapi.tar
 
   deploy:
     needs: build
@@ -61,9 +61,9 @@ jobs:
         uses: appleboy/scp-action@v0.1.0
         with:
           source: |
-            next2.tar
-            strapi.tar
-          target: /root/docker_images/
+            /root/next2.tar
+            /root/strapi.tar
+          target: /root/
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           port: ${{ secrets.VPS_PORT }}
@@ -72,7 +72,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.0
         with:
           source: docker-compose-production.yml
-          target: /root/docker_images/
+          target: /root/
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           port: ${{ secrets.VPS_PORT }}
@@ -84,7 +84,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           port: ${{ secrets.VPS_PORT }}
           script: |
-            cd /root/docker_images/
+            cd /root/
             docker load -i next2.tar
             docker load -i strapi.tar
             docker-compose down
