@@ -17,18 +17,18 @@ jobs:
       - name: Build Docker image for Next.js
         run: |
           cd next2
-          pwd  # Проверка текущей директории
           docker build -t next2:latest -f Dockerfile.production .
-          docker save next2:latest -o ../next2.tar  # Сохраняем файл на уровень выше
+          docker save next2:latest -o next2.tar
+          mv next2.tar ../next2.tar  # Перемещение файла в рабочую директорию
           ls -l ../next2.tar  # Проверка наличия файла next2.tar
 
       # Сборка и сохранение Docker-образа для Strapi с использованием Dockerfile.production
       - name: Build Docker image for Strapi
         run: |
           cd website
-          pwd  # Проверка текущей директории
           docker build -t strapi:latest -f Dockerfile.production .
-          docker save strapi:latest -o ../strapi.tar  # Сохраняем файл на уровень выше
+          docker save strapi:latest -o strapi.tar
+          mv strapi.tar ../strapi.tar  # Перемещение файла в рабочую директорию
           ls -l ../strapi.tar  # Проверка наличия файла strapi.tar
 
       # Загрузка Docker-образов в артефакты GitHub
@@ -36,13 +36,13 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: next2-image
-          path: ../next2.tar  # Указываем путь на уровень выше
+          path: next2.tar  # Загружаем файл, перемещенный в рабочую директорию
 
       - name: Upload strapi Docker image to GitHub artifacts
         uses: actions/upload-artifact@v2
         with:
           name: strapi-image
-          path: ../strapi.tar  # Указываем путь на уровень выше
+          path: strapi.tar  # Загружаем файл, перемещенный в рабочую директорию
 
   deploy:
     needs: build
