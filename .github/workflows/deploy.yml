@@ -13,11 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Free up disk space
-        run: |
-          docker system prune -f
-          sudo rm -rf /var/lib/docker/overlay2/*
-
       - name: Build Docker image for Next.js
         run: |
           cd next2
@@ -88,10 +83,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
-          envs: POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           script: |
-            docker system prune -f
-            sudo rm -rf /var/lib/docker/overlay2/*
             cd /root/docker_images/
             docker-compose down
             docker-compose up -d --build
