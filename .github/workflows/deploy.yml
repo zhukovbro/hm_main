@@ -18,33 +18,44 @@ jobs:
         run: |
           cd next2
           docker build -t next2:latest -f Dockerfile.production .
-          docker images | grep next2  # Проверка наличия образа
-          ls -l                       # Проверка файлов в директории
           docker save next2:latest -o next2.tar
-          ls -l next2.tar             # Проверка наличия файла next2.tar
+          ls -l next2.tar  # Проверка наличия файла next2.tar
 
       # Сборка и сохранение Docker-образа для Strapi с использованием Dockerfile.production
       - name: Build Docker image for Strapi
         run: |
           cd website
           docker build -t strapi:latest -f Dockerfile.production .
-          docker images | grep strapi  # Проверка наличия образа
-          ls -l                        # Проверка файлов в директории
           docker save strapi:latest -o strapi.tar
-          ls -l strapi.tar             # Проверка наличия файла strapi.tar
+          ls -l strapi.tar  # Проверка наличия файла strapi.tar
 
-      # Проверка наличия файлов перед отправкой
-      - name: List files for debugging
-        run: ls -l next2/ && ls -l website/ && ls -l .
-
-      # Копирование Docker-образов и docker-compose-production.yml на VPS
-      - name: Copy Docker images and docker-compose-production.yml to VPS
+      # Копирование Docker-образа next2 на VPS
+      - name: Copy next2 Docker image to VPS
         uses: appleboy/scp-action@v0.1.0
         with:
-          source: |
-            next2/next2.tar
-            website/strapi.tar
-            docker-compose-production.yml
+          source: next2/next2.tar
+          target: /root/
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: ${{ secrets.VPS_PORT }}
+
+      # Копирование Docker-образа strapi на VPS
+      - name: Copy strapi Docker image to VPS
+        uses: appleboy/scp-action@v0.1.0
+        with:
+          source: website/strapi.tar
+          target: /root/
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: ${{ secrets.VPS_PORT }}
+
+      # Копирование docker-compose-production.yml на VPS
+      - name: Copy docker-compose-production.yml to VPS
+        uses: appleboy/scp-action@v0.1.0
+        with:
+          source: docker-compose-production.yml
           target: /root/
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
