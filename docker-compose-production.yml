@@ -5,18 +5,16 @@ services:
       - "5432:5432"
     volumes:
       - postgres_prod:/var/lib/postgresql/data
+
   frontend:
-    build:
-      context: /root/next2
-      dockerfile: Dockerfile.production
+    image: next2:latest  # Использование образа, переданного на сервер
     ports:
       - "80:80"
     volumes:
       - /app/node_modules
+
   backend:
-    build:
-      context: /root/website
-      dockerfile: Dockerfile.production
+    image: strapi:latest  # Использование образа, переданного на сервер
     ports:
       - "1337:1337"
     volumes:
@@ -24,6 +22,7 @@ services:
       - strapi_public_prod:/app/public
     depends_on:
       - postgres
+
 volumes:
   postgres_prod:
   strapi_public_prod:
