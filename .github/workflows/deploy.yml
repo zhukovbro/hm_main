@@ -17,8 +17,6 @@ jobs:
       - name: Build Docker image for Next.js
         run: |
           cd next2
-          pwd  # Проверка текущей директории
-          ls -l  # Проверка файлов в текущей директории
           docker build -t next2:latest -f Dockerfile.production .
           docker save next2:latest -o next2.tar
           ls -l next2.tar  # Проверка наличия файла next2.tar
@@ -27,17 +25,39 @@ jobs:
       - name: Build Docker image for Strapi
         run: |
           cd website
-          pwd  # Проверка текущей директории
-          ls -l  # Проверка файлов в текущей директории
           docker build -t strapi:latest -f Dockerfile.production .
           docker save strapi:latest -o strapi.tar
           ls -l strapi.tar  # Проверка наличия файла strapi.tar
 
-      # Проверка наличия файлов перед отправкой
-      - name: Check if tar files exist
-        run: |
-          ls -l next2.tar
-          ls -l strapi.tar
+      # Загрузка Docker-образов в артефакты GitHub
+      - name: Upload Docker images to GitHub artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: next2-image
+          path: next2.tar
+
+      - name: Upload Docker images to GitHub artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: strapi-image
+          path: strapi.tar
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download next2 Docker image from GitHub artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: next2-image
+          path: .
+
+      - name: Download strapi Docker image from GitHub artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: strapi-image
+          path: .
 
       # Копирование Docker-образа next2 на VPS
       - name: Copy next2 Docker image to VPS
