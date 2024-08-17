@@ -33,8 +33,8 @@ jobs:
       - name: Copy next2 Docker image to VPS
         uses: appleboy/scp-action@v0.1.0
         with:
-          source: next2/next2.tar
-          target: /root/
+          source: next2.tar
+          target: /root/docker_images/
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
@@ -44,8 +44,8 @@ jobs:
       - name: Copy strapi Docker image to VPS
         uses: appleboy/scp-action@v0.1.0
         with:
-          source: website/strapi.tar
-          target: /root/
+          source: strapi.tar
+          target: /root/docker_images/
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
@@ -56,7 +56,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.0
         with:
           source: docker-compose-production.yml
-          target: /root/
+          target: /root/docker_images/
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
@@ -71,9 +71,9 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
           script: |
-            cd /root/
+            cd /root/docker_images/
             docker-compose down
-            docker load -i /root/next2.tar
-            docker load -i /root/strapi.tar
+            docker load -i next2.tar
+            docker load -i strapi.tar
             docker-compose -f docker-compose-production.yml up -d --build
           debug: true
