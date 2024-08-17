@@ -39,7 +39,7 @@ jobs:
             next2/next2.tar
             website/strapi.tar
             docker-compose-production.yml
-          target: /
+          target: /root/
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
@@ -54,8 +54,9 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
           script: |
+            cd /root/
             docker-compose down
-            docker load -i next2.tar
-            docker load -i strapi.tar
+            docker load -i /root/next2.tar
+            docker load -i /root/strapi.tar
             docker-compose -f docker-compose-production.yml up -d --build
           debug: true
