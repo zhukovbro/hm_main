@@ -13,6 +13,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Free up disk space
+        run: |
+          docker system prune -f
+          sudo rm -rf /var/lib/docker/overlay2/*
+
       - name: Build Docker image for Next.js
         run: |
           cd next2
@@ -76,7 +81,7 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
 
-      - name: Deploy to VPS
+      - name: SSH into VPS and restart containers with new images
         uses: appleboy/ssh-action@v0.1.0
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -85,6 +90,9 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           envs: POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           script: |
+            docker system prune -f
+            sudo rm -rf /var/lib/docker/overlay2/*
             cd /root/docker_images/
             docker-compose down
             docker-compose up -d --build
+          debug: true
