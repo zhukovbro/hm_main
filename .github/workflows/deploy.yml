@@ -18,24 +18,28 @@ jobs:
           cd next2
           docker build -t next2:latest -f Dockerfile.production .
           docker save next2:latest -o next2.tar
+          ls -lh next2.tar
 
       - name: Build Docker image for Strapi
         run: |
           cd website
           docker build -t strapi:latest -f Dockerfile.production .
           docker save strapi:latest -o strapi.tar
+          ls -lh strapi.tar
 
       - name: Upload Next.js Docker image to GitHub artifacts
+        if: success()
         uses: actions/upload-artifact@v2
         with:
           name: next2-image
-          path: next2.tar
+          path: next2/next2.tar
 
       - name: Upload Strapi Docker image to GitHub artifacts
+        if: success()
         uses: actions/upload-artifact@v2
         with:
           name: strapi-image
-          path: strapi.tar
+          path: website/strapi.tar
 
   deploy:
     needs: build
