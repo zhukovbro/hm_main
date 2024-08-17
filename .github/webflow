@@ -1,0 +1,58 @@
+name: Build, Push, Deploy Docker Containers
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Сборка и сохранение Docker-образа для Next.js с использованием Dockerfile.production
+      - name: Build Docker image for Next.js
+        run: |
+          cd next2
+          docker build -t next2:latest -f Dockerfile.production .
+          docker save next2:latest -o next2.tar
+
+      # Сборка и сохранение Docker-образа для Strapi с использованием Dockerfile.production
+      - name: Build Docker image for Strapi
+        run: |
+          cd ../website
+          docker build -t strapi:latest -f Dockerfile.production .
+          docker save strapi:latest -o strapi.tar
+
+      # Копирование Docker-образов и docker-compose-production.yml на VPS
+      - name: Copy Docker images and docker-compose-production.yml to VPS
+        uses: appleboy/scp-action@v0.1.0
+        with:
+          source: |
+            next2/next2.tar
+            website/strapi.tar
+            docker-compose-production.yml
+          target: /root/
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: ${{ secrets.VPS_PORT }}
+
+      # Остановка старых контейнеров, загрузка новых и запуск с новыми образами
+      - name: SSH into VPS and restart containers with new images
+        uses: appleboy/ssh-action@v0.1.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            cd /root/
+            docker-compose down
+            docker load -i next2.tar
+            docker load -i strapi.tar
+            docker-compose -f docker-compose-production.yml up -d --build
+          debug: true
