@@ -1,4 +1,4 @@
-name: Build, Push, Deploy Docker Containers2
+name: Build, Push, Deploy Docker Containers
 
 on:
   push:
@@ -53,7 +53,7 @@ jobs:
           name: strapi-image
 
       - name: Set up SSH
-        uses: webfactory/ssh-agent@v1
+        uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
