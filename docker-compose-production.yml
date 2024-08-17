@@ -5,8 +5,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_prod:/var/lib/postgresql/data
-    env_file:
-      - ./config/production.env
   frontend:
     build:
       context: ./next2
@@ -16,8 +14,6 @@ services:
     volumes:
       - ./next2/src:/app/src
       - /app/node_modules
-    env_file:
-      - ./config/production.env
   backend:
     build:
       context: ./website
@@ -30,8 +26,6 @@ services:
       - strapi_public_prod:/app/public
     depends_on:
       - postgres
-    env_file:
-      - ./config/production.env
 volumes:
   postgres_prod:
   strapi_public_prod:
