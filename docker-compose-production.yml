@@ -3,30 +3,29 @@ version: '3.7'
 services:
   postgres:
     image: "postgres"
+    restart: always
     ports:
       - "5432:5432"
     volumes:
       - postgres_prod:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  # Использование переменной окружения
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
   frontend:
-    build:
-      context: /root/next2
-      dockerfile: Dockerfile.production
+    image: next2:latest
+    restart: always
     ports:
       - "8080:80"
     volumes:
-      - /app/node_modules
+      - /root/next2/node_modules:/app/node_modules
 
   backend:
-    build:
-      context: /root/website
-      dockerfile: Dockerfile.production
+    image: strapi:latest
+    restart: always
     ports:
       - "1337:1337"
     volumes:
-      - /app/node_modules
+      - /root/website/node_modules:/app/node_modules
       - strapi_public_prod:/app/public
     depends_on:
       - postgres
@@ -36,7 +35,7 @@ services:
       DATABASE_PORT: 5432
       DATABASE_NAME: strapi
       DATABASE_USERNAME: postgres
-      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}  # Использование переменной окружения
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
 
 volumes:
   postgres_prod:
