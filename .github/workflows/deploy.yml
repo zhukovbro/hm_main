@@ -1,4 +1,4 @@
-name: Build, Push, Deploy Docker Containers2
+name: Build, Push, Deploy Docker Containers
 
 on:
   push:
@@ -13,105 +13,78 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Сборка и сохранение Docker-образа для Next.js с использованием Dockerfile.production
       - name: Build Docker image for Next.js
         run: |
           cd next2
           docker build -t next2:latest -f Dockerfile.production .
           docker save next2:latest -o next2.tar
-          mv next2.tar ../next2.tar  # Перемещение файла в рабочую директорию
-          ls -l ../next2.tar  # Проверка наличия файла next2.tar
 
-      # Сборка и сохранение Docker-образа для Strapi с использованием Dockerfile.production
       - name: Build Docker image for Strapi
         run: |
           cd website
           docker build -t strapi:latest -f Dockerfile.production .
           docker save strapi:latest -o strapi.tar
-          mv strapi.tar ../strapi.tar  # Перемещение файла в рабочую директорию
-          ls -l ../strapi.tar  # Проверка наличия файла strapi.tar
 
-      # Загрузка Docker-образов в артефакты GitHub
-      - name: Upload next2 Docker image to GitHub artifacts
+      - name: Upload Next.js Docker image to GitHub artifacts
         uses: actions/upload-artifact@v2
         with:
           name: next2-image
-          path: next2.tar  # Загружаем файл, перемещенный в рабочую директорию
+          path: next2.tar
 
-      - name: Upload strapi Docker image to GitHub artifacts
+      - name: Upload Strapi Docker image to GitHub artifacts
         uses: actions/upload-artifact@v2
         with:
           name: strapi-image
-          path: strapi.tar  # Загружаем файл, перемещенный в рабочую директорию
+          path: strapi.tar
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code (Deploy Step)
-        uses: actions/checkout@v2
-
-      - name: Download next2 Docker image from GitHub artifacts
+      - name: Download Next.js Docker image from GitHub artifacts
         uses: actions/download-artifact@v2
         with:
           name: next2-image
           path: .
 
-      - name: Download strapi Docker image from GitHub artifacts
+      - name: Download Strapi Docker image from GitHub artifacts
         uses: actions/download-artifact@v2
         with:
           name: strapi-image
           path: .
 
-      # Копирование Docker-образа next2 на VPS
-      - name: Copy next2 Docker image to VPS
+      - name: Copy Docker images to VPS
         uses: appleboy/scp-action@v0.1.0
         with:
-          source: ./next2.tar
+          source: |
+            next2.tar
+            strapi.tar
           target: /root/docker_images/
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
-          debug: true
 
-      # Копирование Docker-образа strapi на VPS
-      - name: Copy strapi Docker image to VPS
-        uses: appleboy/scp-action@v0.1.0
-        with:
-          source: ./strapi.tar
-          target: /root/docker_images/
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          password: ${{ secrets.VPS_PASSWORD }}
-          port: ${{ secrets.VPS_PORT }}
-          debug: true
-
-      # Копирование docker-compose-production.yml на VPS
       - name: Copy docker-compose-production.yml to VPS
         uses: appleboy/scp-action@v0.1.0
         with:
-          source: ./docker-compose-production.yml
+          source: docker-compose-production.yml
           target: /root/docker_images/
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
-          debug: true
 
-      # Остановка старых контейнеров, загрузка новых и запуск с новыми образами
-      - name: SSH into VPS and restart containers with new images
+      - name: Deploy to VPS
         uses: appleboy/ssh-action@v0.1.0
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
+          envs: POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           script: |
             cd /root/docker_images/
             docker-compose down
-            docker load -i next2.tar
-            docker load -i strapi.tar
-            docker-compose -f docker-compose-production.yml up -d --build
-          debug: true
+            docker-compose up -d --build
