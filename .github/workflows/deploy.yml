@@ -25,6 +25,11 @@ jobs:
           docker build -t strapi:latest -f Dockerfile.production .
           docker save strapi:latest -o ../strapi.tar
 
+      - name: ПРОВЕРКА
+        run: |
+        pwd
+        ls
+
       - name: Upload Next.js Docker image to GitHub artifacts
         uses: actions/upload-artifact@v4
         with:
