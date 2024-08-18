@@ -27,8 +27,8 @@ jobs:
 
       - name: ПРОВЕРКА
         run: |
-        pwd
-        ls
+          pwd
+          ls
 
       - name: Upload Next.js Docker image to GitHub artifacts
         uses: actions/upload-artifact@v4
