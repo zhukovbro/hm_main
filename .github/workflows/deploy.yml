@@ -75,6 +75,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}  # Здесь передается пароль
           port: ${{ secrets.VPS_PORT }}
+          tar: false
 
       - name: SSH into VPS and restart containers with new images
         uses: appleboy/ssh-action@v0.1.0
@@ -89,3 +90,4 @@ jobs:
             docker load -i strapi.tar
             docker-compose down
             docker-compose up -d --build
+            
