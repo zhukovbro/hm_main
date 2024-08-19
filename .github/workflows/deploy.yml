@@ -57,6 +57,13 @@ jobs:
         with:
           name: strapi-image
 
+      - name: Проверка что файлы существуют
+        run: |
+          ls -la next2.tar
+          ls -la strapi.tar
+          ls
+          pwd
+
       - name: Copy Docker images to VPS using SCP with password
         uses: appleboy/scp-action@v0.1.0
         with:
