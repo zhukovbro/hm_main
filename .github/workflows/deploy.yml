@@ -68,8 +68,8 @@ jobs:
         uses: appleboy/scp-action@v0.1.0
         with:
           source: |
-            next2.tar
-            strapi.tar
+            ./next2.tar
+            ./strapi.tar
           target: /root/
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
