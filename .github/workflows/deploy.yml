@@ -57,12 +57,7 @@ jobs:
         with:
           name: strapi-image
 
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Copy Docker images to VPS
+      - name: Copy Docker images to VPS using SCP with password
         uses: appleboy/scp-action@v0.1.0
         with:
           source: |
@@ -71,15 +66,7 @@ jobs:
           target: /root/
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          port: ${{ secrets.VPS_PORT }}
-
-      - name: Copy docker-compose-production.yml to VPS
-        uses: appleboy/scp-action@v0.1.0
-        with:
-          source: docker-compose-production.yml
-          target: /root/
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}  # Здесь передается пароль
           port: ${{ secrets.VPS_PORT }}
 
       - name: SSH into VPS and restart containers with new images
@@ -87,6 +74,7 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}  # Здесь передается пароль
           port: ${{ secrets.VPS_PORT }}
           script: |
             cd /root/
@@ -94,4 +82,3 @@ jobs:
             docker load -i strapi.tar
             docker-compose down
             docker-compose up -d --build
-          debug: true
