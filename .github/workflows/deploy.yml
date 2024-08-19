@@ -25,18 +25,17 @@ jobs:
           docker build -t strapi:latest -f Dockerfile.production .
           docker save strapi:latest -o ../strapi.tar
 
-      - name: Проверка текущей директории и наличия файлов
-        run: |
-          pwd
-          ls -la
-          ls -la next2.tar strapi.tar
+#      - name: Проверка текущей директории и наличия файлов
+#        run: |
+#          pwd
+#          ls -la
+#          ls -la next2.tar strapi.tar
 
-      - name: Прямая передача через SCP
+      - name: SCP с указанием пароля через переменные окружения
         run: |
-          scp -o StrictHostKeyChecking=no -P ${{ secrets.VPS_PORT }} /home/runner/work/hm_main/hm_main/next2.tar ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/
-          scp -o StrictHostKeyChecking=no -P ${{ secrets.VPS_PORT }} /home/runner/work/hm_main/hm_main/strapi.tar ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/
-        env:
-          SSH_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+          export SSHPASS="${{ secrets.VPS_PASSWORD }}"
+          sshpass -e scp -o StrictHostKeyChecking=no -P ${{ secrets.VPS_PORT }} /home/runner/work/hm_main/hm_main/next2.tar ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/
+          sshpass -e scp -o StrictHostKeyChecking=no -P ${{ secrets.VPS_PORT }} /home/runner/work/hm_main/hm_main/strapi.tar ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/
 
       - name: SSH into VPS and restart containers with new images
         uses: appleboy/ssh-action@v0.1.0
