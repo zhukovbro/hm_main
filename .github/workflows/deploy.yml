@@ -31,18 +31,12 @@ jobs:
           ls -la
           ls -la next2.tar strapi.tar
 
-      - name: SCP
-        uses: appleboy/scp-action@v0.1.0
-        with:
-          source: |
-            /home/runner/work/hm_main/hm_main/next2.tar
-            /home/runner/work/hm_main/hm_main/strapi.tar
-          target: /
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          password: ${{ secrets.VPS_PASSWORD }}  # Здесь передается пароль
-          port: ${{ secrets.VPS_PORT }}
-          debug: true
+      - name: Прямая передача через SCP
+        run: |
+          scp -o StrictHostKeyChecking=no -P ${{ secrets.VPS_PORT }} /home/runner/work/hm_main/hm_main/next2.tar ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/
+          scp -o StrictHostKeyChecking=no -P ${{ secrets.VPS_PORT }} /home/runner/work/hm_main/hm_main/strapi.tar ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/
+        env:
+          SSH_PASSWORD: ${{ secrets.VPS_PASSWORD }}
 
       - name: SSH into VPS and restart containers with new images
         uses: appleboy/ssh-action@v0.1.0
