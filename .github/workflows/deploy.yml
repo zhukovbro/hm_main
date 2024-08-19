@@ -1,4 +1,4 @@
-name: Build, Push, Deploy Docker Containers
+name: Build, Push, Deploy Docker Containers43
 
 on:
   push:
@@ -25,16 +25,16 @@ jobs:
           docker build -t strapi:latest -f Dockerfile.production .
           docker save strapi:latest -o ../strapi.tar
 
-      - name: SCP Next.js и Strapi образы напрямую на VPS
+      - name: SCP
         uses: appleboy/scp-action@v0.1.0
         with:
           source: |
             next2.tar
             strapi.tar
-          target: /root/
+          target: /
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          password: ${{ secrets.VPS_PASSWORD }}
+          password: ${{ secrets.VPS_PASSWORD }}  # Здесь передается пароль
           port: ${{ secrets.VPS_PORT }}
 
       - name: SSH into VPS and restart containers with new images
@@ -42,7 +42,7 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          password: ${{ secrets.VPS_PASSWORD }}
+          password: ${{ secrets.VPS_PASSWORD }}  # Здесь передается пароль
           port: ${{ secrets.VPS_PORT }}
           script: |
             cd /root/
