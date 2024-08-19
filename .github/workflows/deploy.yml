@@ -25,6 +25,15 @@ jobs:
           docker build -t strapi:latest -f Dockerfile.production .
           docker save strapi:latest -o ../strapi.tar
 
+      - name: Проверка текущей директории и наличия файлов
+        run: |
+          echo "Текущая директория:"
+          pwd
+          echo "Содержимое директории:"
+          ls -la
+          echo "Проверка наличия файлов:"
+          ls -la next2.tar strapi.tar
+
       - name: SCP
         uses: appleboy/scp-action@v0.1.0
         with:
