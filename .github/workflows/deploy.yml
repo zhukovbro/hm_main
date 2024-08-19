@@ -1,4 +1,4 @@
-name: Build, Push, Deploy Docker Containers43
+name: Build, Push, Deploy Docker Containers
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Проверка кода
         uses: actions/checkout@v4
 
       - name: Build Docker image for Next.js
@@ -25,50 +25,16 @@ jobs:
           docker build -t strapi:latest -f Dockerfile.production .
           docker save strapi:latest -o ../strapi.tar
 
-      - name: Загрузка 1 докера GitHub artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: next2-image
-          path: next2.tar
-
-      - name: Загрузка 2 докера GitHub artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: strapi-image
-          path: strapi.tar
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Скачивание 1 из артефакта
-        uses: actions/download-artifact@v4
-        with:
-          name: next2-image
-
-      - name: Скачивание 2 из артефакта
-        uses: actions/download-artifact@v4
-        with:
-          name: strapi-image
-
-      - name: Проверка что файлы существуют
-        run: |
-          ls
-          pwd
-          ls -la next2.tar
-          ls -la strapi.tar
-
-      - name: SCP
+      - name: SCP Next.js и Strapi образы напрямую на VPS
         uses: appleboy/scp-action@v0.1.0
         with:
           source: |
             next2.tar
             strapi.tar
-          target: /
+          target: /root/
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          password: ${{ secrets.VPS_PASSWORD }}  # Здесь передается пароль
+          password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
 
       - name: SSH into VPS and restart containers with new images
@@ -76,7 +42,7 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          password: ${{ secrets.VPS_PASSWORD }}  # Здесь передается пароль
+          password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
           script: |
             cd /root/
