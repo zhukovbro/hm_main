@@ -25,18 +25,13 @@ jobs:
           docker build -t strapi:latest -f Dockerfile.production .
           docker save strapi:latest -o ../strapi.tar
 
-      - name: ПРОВЕРКА
-        run: |
-          pwd
-          ls
-
-      - name: Upload Next.js Docker image to GitHub artifacts
+      - name: Загрузка 1 докера GitHub artifacts
         uses: actions/upload-artifact@v4
         with:
           name: next2-image
           path: next2.tar
 
-      - name: Upload Strapi Docker image to GitHub artifacts
+      - name: Загрузка 2 докера GitHub artifacts
         uses: actions/upload-artifact@v4
         with:
           name: strapi-image
@@ -47,30 +42,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download Next.js Docker image from GitHub artifacts
+      - name: Скачивание 1 из артефакта
         uses: actions/download-artifact@v4
         with:
           name: next2-image
 
-      - name: Download Strapi Docker image from GitHub artifacts
+      - name: Скачивание 2 из артефакта
         uses: actions/download-artifact@v4
         with:
           name: strapi-image
 
       - name: Проверка что файлы существуют
         run: |
-          ls -la next2.tar
-          ls -la strapi.tar
           ls
           pwd
+          ls -la next2.tar
+          ls -la strapi.tar
+          
 
-      - name: Copy Docker images to VPS using SCP with password
+      - name: SCP
         uses: appleboy/scp-action@v0.1.0
         with:
           source: |
-            ./next2.tar
-            ./strapi.tar
-          target: /root/
+            next2.tar
+            strapi.tar
+          target: /
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}  # Здесь передается пароль
@@ -90,4 +86,3 @@ jobs:
             docker load -i strapi.tar
             docker-compose down
             docker-compose up -d --build
-            
