@@ -35,14 +35,14 @@ jobs:
         uses: appleboy/scp-action@v0.1.0
         with:
           source: |
-            next2.tar
-            strapi.tar
+            /home/runner/work/hm_main/hm_main/next2.tar
+            /home/runner/work/hm_main/hm_main/strapi.tar
           target: /
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}  # Здесь передается пароль
           port: ${{ secrets.VPS_PORT }}
-          tar: false
+          debug: true
 
       - name: SSH into VPS and restart containers with new images
         uses: appleboy/ssh-action@v0.1.0
