@@ -58,7 +58,6 @@ jobs:
           pwd
           ls -la next2.tar
           ls -la strapi.tar
-          
 
       - name: SCP
         uses: appleboy/scp-action@v0.1.0
@@ -71,7 +70,6 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}  # Здесь передается пароль
           port: ${{ secrets.VPS_PORT }}
-          tar: false
 
       - name: SSH into VPS and restart containers with new images
         uses: appleboy/ssh-action@v0.1.0
