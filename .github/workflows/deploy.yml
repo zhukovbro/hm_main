@@ -1,0 +1,55 @@
+name: Build, Push, Deploy Docker Containers231
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Проверка кода
+        uses: actions/checkout@v4
+
+      - name: Build Docker image for Next.js
+        run: |
+          cd next2
+          docker build -t next2:latest -f Dockerfile.production .
+          docker save next2:latest -o ../next2.tar
+
+      - name: Build Docker image for Strapi
+        run: |
+          cd website
+          docker build -t strapi:latest -f Dockerfile.production .
+          docker save strapi:latest -o ../strapi.tar
+
+      - name: SCP для передачи Docker образов и compose файла
+        run: |
+          export SSHPASS="${{ secrets.VPS_PASSWORD }}"
+          sshpass -e scp -o StrictHostKeyChecking=no -P ${{ secrets.VPS_PORT }} /home/runner/work/hm_main/hm_main/next2.tar ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/
+          sshpass -e scp -o StrictHostKeyChecking=no -P ${{ secrets.VPS_PORT }} /home/runner/work/hm_main/hm_main/strapi.tar ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/
+          sshpass -e scp -o StrictHostKeyChecking=no -P ${{ secrets.VPS_PORT }} /home/runner/work/hm_main/hm_main/docker-compose-production.yml ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/
+
+      - name: SSH into VPS, restart containers, and clean up
+        uses: appleboy/ssh-action@v0.1.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            cd /root/
+            export POSTGRES_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            export DATABASE_CLIENT=${{ secrets.DATABASE_CLIENT }}
+            export DATABASE_HOST=${{ secrets.DATABASE_HOST }}
+            export DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            export DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            export DATABASE_PORT=${{ secrets.DATABASE_PORT }}
+            docker load -i next2.tar
+            docker load -i strapi.tar
+            docker-compose -f docker-compose-production.yml down
+            docker-compose -f docker-compose-production.yml up -d --build
+            rm -rf /root/next2 /root/website  
+            rm -f /root/next2.tar /root/strapi.tar
