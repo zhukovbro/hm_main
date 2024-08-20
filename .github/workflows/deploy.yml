@@ -41,21 +41,14 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             cd /root/
+            export POSTGRES_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            export DATABASE_CLIENT=${{ secrets.DATABASE_CLIENT }}
+            export DATABASE_HOST=${{ secrets.DATABASE_HOST }}
+            export DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            export DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            export DATABASE_PORT=${{ secrets.DATABASE_PORT }}
             docker load -i next2.tar
             docker load -i strapi.tar
-            POSTGRES_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
-            DATABASE_CLIENT=${{ secrets.DATABASE_CLIENT }} \
-            DATABASE_HOST=${{ secrets.DATABASE_HOST }} \
-            DATABASE_PORT=${{ secrets.DATABASE_PORT }} \
-            DATABASE_NAME=${{ secrets.DATABASE_NAME }} \
-            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }} \
-            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
-            ADMIN_JWT_SECRET=${{ secrets.ADMIN_JWT_SECRET }} \
-            API_TOKEN_SALT=${{ secrets.API_TOKEN_SALT }} \
-            APP_KEYS=${{ secrets.APP_KEYS }} \
-            JWT_SECRET=${{ secrets.JWT_SECRET }} \
-            TRANSFER_TOKEN_SALT=${{ secrets.TRANSFER_TOKEN_SALT }} \
-            DATABASE_SSL=${{ secrets.DATABASE_SSL }} \
             docker-compose -f docker-compose-production.yml down
             docker-compose -f docker-compose-production.yml up -d --build
             rm -rf /root/next2 /root/website  
