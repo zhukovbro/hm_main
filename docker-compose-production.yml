@@ -25,6 +25,8 @@ services:
       - "8080:80"
     volumes:
       - /root/next2/node_modules:/app/node_modules
+    environment:
+      NODE_ENV: production
 
   backend:
     image: strapi:latest
